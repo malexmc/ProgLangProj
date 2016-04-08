@@ -1,0 +1,15 @@
+#lang racket
+
+(require "FinalProject.rkt")
+
+(define test0
+  (mupllist->racketlist
+   (eval-exp (apair (int 1) (apair (int 1) (apair (int 1) (apair (int 1) (apair (int 1) (aunit)))))))))
+
+; a test case that uses parts 1, 2, and 4
+; should produce (list (int 10) (int 11) (int 16))
+(define test1
+  (mupllist->racketlist
+   (eval-exp (call (call mupl-mapAddN (int 7))
+                   (racketlist->mupllist 
+                    (list (int 3) (int 4) (int 9)))))))

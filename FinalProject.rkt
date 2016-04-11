@@ -18,7 +18,7 @@
 (struct isaunit (e) #:transparent) ;; evaluate to 1 if e is unit else 0
 
 ;; a closure is not in "source" programs; it is what functions evaluate to
-(struct closure (env fun) #:transparent) 
+(struct closure (env fun) #:transparent)
 
 ;; Part 1 - Warm-up
 
@@ -31,6 +31,7 @@
   (if (aunit? muplList)
       null
       (cons (apair-e1 muplList) (mupllist->racketlist (apair-e2 muplList)))))
+
 
 ;; Part 2 - Implementing the language
 
@@ -67,23 +68,19 @@
                       (int-num v2))
                    (eval-under-env (ifgreater-e3 e) env)
                    (eval-under-env (ifgreater-e4 e) env))
-               (error "MUPL ifgreater applied to non-number")))]        
-        [(fun? e)
-         (closure env e)]
+               (error "MUPL ifgreater applied to non-number")))]  
+        [(fun? e) (closure env e)]
         [(call? e)
-         (let ([funClosure (eval-under-env (call-funexp e) env)]
-               [something (eval-under-env (call-actual e) env)])
-           (if (closure? funClosure)
-               (let* ([funEnvironment (closure-env funClosure)]
-                      [funFunction (closure-fun funClosure)]
-                      [funNameopt (cons (fun-nameopt funFunction) funClosure)]
-                      [funFormal (cons (fun-formal funFunction) something)])
-                 (eval-under-env
-                  (fun-body funFunction)
-                  (if (eq? (car funNameopt) #f)
-                      (cons funFormal funEnvironment)
-                      (cons funFormal (cons funNameopt funEnvironment)))))
-               (error "MUPL call applied to expression with invalid closure")))]
+         (let ([cl (eval-under-env (call-funexp e) env)])
+           (if (closure? cl)
+               (let* ([fn (closure-fun cl)]
+                      [v (eval-under-env (call-actual e) env)]
+                      [env (cons (cons (fun-formal fn) v) (closure-env cl))])
+                 (if (fun-nameopt fn)
+                   (let ([env (cons (cons (fun-nameopt fn) cl) env)])
+                     (eval-under-env (fun-body fn) env))
+                   (eval-under-env (fun-body fn) env)))
+               (error "First param for call is not a closure")))]
         [(mlet? e)
          (let* ([assignedValue (eval-under-env (mlet-e e) env)]
                 [variable (mlet-var e)])
@@ -102,11 +99,10 @@
            (if (apair? v)
                (apair-e2 v)
                (error "MUPL second appied to non-pair")))]
-        [(aunit? e)
-          e]
+        [(aunit? e) e]
         [(isaunit? e)
          (let ([v (eval-under-env (isaunit-e e) env)])
-           (if (aunit? e)
+           (if (aunit? v)
                (int 1)
                (int 0)
                ))]
@@ -159,4 +155,3 @@
   (mlet "map" mupl-map
         (fun "#f" "i"
              (call (var "map") (fun #f "x" (add (var "x") (var "i")))))))
-

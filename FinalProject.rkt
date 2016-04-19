@@ -1,4 +1,6 @@
 ;; CS 4003: Programming Languages, Team Project
+;; Authors: William Hauber, Matthew McClellan, and John Mikolay
+;; Code adapted in part from project by Ernestas Poskus @ https://github.com/ernestas-poskus
 
 #lang racket
 (provide (all-defined-out)) ;; so we can put tests in a second file

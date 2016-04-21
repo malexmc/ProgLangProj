@@ -5,8 +5,13 @@
 (define (fun_testRktToMuplList)
   (fun
    #f "unused"
+   ; Apply the map to our list
    (call
+    
+    ; But first, build the mapAddN function itself
     (call mupl-mapAddN (int 7))
+    
+    ; Then define the list
     (racketlist->mupllist 
      (list (int 3) (int 4) (int 9))
      )
@@ -181,6 +186,7 @@
    )
   )
 
+; NOT USED
 (define (fun_mapFibo)
   ; Add a reference to our map function
   (mlet
@@ -193,22 +199,30 @@
     ; We don't actually use the parameter
     (fun #f "notUsed"
          (call
+          ; The mapping function
           (var "map")
+
+          ; The function we're applying to the items in the list
           (var "fiboGood")
           )
          )
     )
    )
   )
+; END NOT USED
 
+; This builds the fibo mapping function
 (define mupl-mapFibo
   ; Add a reference to our map function
   (mlet
    "map" mupl-map
-   (fun #f "n"
+   (fun #f "notUsed"
         ; Apply the map function
         (call
+         ; Call the map function ...
          (var "map")
+
+         ; ... passing in fiboGood as the parameter
          (fun_fiboGood)
          )
         )

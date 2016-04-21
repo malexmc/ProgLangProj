@@ -1,6 +1,21 @@
 #lang racket
 
-(require "plproject.rkt")
+(require "FinalProject.rkt")
+
+(define test0
+  (mupllist->racketlist
+   (eval-exp (apair (int 1) (apair (int 1) (apair (int 1) (apair (int 1) (apair (int 1) (aunit)))))))))
+
+
+;Test to see if list manipulation is alright
+(define test2
+  (mupllist->racketlist(eval-exp (racketlist->mupllist(list (int 3) (int 4) (int 9))))))
+
+;Test to see if mapaddN calling is alright
+(define test3
+  (call (call mupl-mapAddN (int 7))
+                   (racketlist->mupllist 
+                    (list (int 3) (int 4) (int 9)))))
 
 ; a test case that uses parts 1, 2, and 4
 ; should produce (list (int 10) (int 11) (int 16))
@@ -9,3 +24,8 @@
    (eval-exp (call (call mupl-mapAddN (int 7))
                    (racketlist->mupllist 
                     (list (int 3) (int 4) (int 9)))))))
+
+; Test var
+(define test1_basic
+  (eval-exp (int 4)))
+

@@ -11,7 +11,7 @@
 (struct add  (operand1 operand2)  #:transparent)  ;; add two expressions
 (struct ifgreater (leftSideOperand rightSideOperand trueResult falseResult)    #:transparent) ;; if e1 > e2 then e3 else e4
 (struct fun  (functionName functionArg functionBody) #:transparent) ;; a recursive(?) 1-argument function
-(struct call (functionExpression functionBinding)       #:transparent) ;; function call
+(struct call (functionClosure functionBinding)       #:transparent) ;; function call
 (struct mlet (var e body) #:transparent) ;; a local binding (let var = e in body) 
 (struct apair (pairHead pairTail)     #:transparent) ;; make a new pair
 (struct fst  (currentPair)    #:transparent) ;; get first part of a pair
@@ -96,9 +96,9 @@
         ;;Models a function call
         [(call? e)
          ;;creates the racket function closure from the mupl expression
-         (let ([currentClosure (eval-under-env (call-functionExpression e) env)])
+         (let ([currentClosure (eval-under-env (call-functionClosure e) env)])
 
-           ;;If the closure looks good, , else throw error
+           ;;If the closure looks good, call the function, else throw error
            (if (closure? currentClosure)
                (let* ([racketFunctionClosure (closure-fun currentClosure)]
                       [functionBinding (eval-under-env (call-functionBinding e) env)]

@@ -100,13 +100,20 @@
 
            ;;If the closure looks good, call the function, else throw error
            (if (closure? currentClosure)
-               (let* ([racketFunctionClosure (closure-fun currentClosure)]
+               (let* ([racketFunction (closure-fun currentClosure)]
                       [functionArg (eval-under-env (call-functionArg e) env)]
-                      [env (cons (cons (fun-functionArg racketFunctionClosure) functionArg) (closure-env currentClosure))])
-                 (if (fun-functionName racketFunctionClosure)
-                   (let ([env (cons (cons (fun-functionName racketFunctionClosure) currentClosure) env)])
-                     (eval-under-env (fun-functionBody racketFunctionClosure) env))
-                   (eval-under-env (fun-functionBody racketFunctionClosure) env)))
+                      [env (cons (cons (fun-functionArg racketFunction) functionArg) (closure-env currentClosure))])
+                 (if
+                  ; If the function name is not #f ...
+                  (fun-functionName racketFunction)
+
+                  ; ... then add the function to the environment (to allow for recursion)
+                  (let ([envWithFunction (cons (cons (fun-functionName racketFunction) currentClosure) env)])
+                    ; then evaluate the function
+                    (eval-under-env (fun-functionBody racketFunction) envWithFunction))
+
+                  ; otherwise, just evaluate the function
+                  (eval-under-env (fun-functionBody racketFunction) env)))
                (error "First param for call is not a closure")))]
                
                
@@ -114,7 +121,13 @@
         [(mlet? e)
          (let* ([assignedValue (eval-under-env (mlet-e e) env)]
                 [variable (mlet-var e)])
-           (eval-under-env (mlet-body e) (cons (cons variable assignedValue) env)))]
+           (eval-under-env
+            
+            ; Evaluate the mlet body
+            (mlet-body e)
+
+            ; Under the new environment (with the new binding added)
+            (cons (cons variable assignedValue) env)))]
            
         ;; Checks if e is apair. Returns the paired values of racketPairHead and racketPairTail
         [(apair? e)
@@ -197,7 +210,12 @@
 
   ;;If racketPairList isn't null, make muplexpression using
   (if (null? racketPairList)
+
+      ; If we're at the end of our bindings, evaluate the expression
       muplExpresion
+
+      ; Otherwise, add another mlet (to the body of the previous mlet) and recurse on
+      ; the rest of the bindings
       (mlet (car (car racketPairList))
             (cdr (car racketPairList))
             (mlet* (cdr racketPairList) muplExpresion))))
@@ -205,13 +223,20 @@
 ;;Compares integers int1 and int2. If they are equal, evaluate trueResult
 ;;, else evaluate falseResult
 (define (ifeq int1 int2 trueResult falseResult)
+  ; Add the variables for int1 and int2 to the environment
   (mlet* (list (cons "_x" int1) (cons "_y" int2))
+
+         ; If x > y, they're not equal, so false result
          (ifgreater (var "_x")
                     (var "_y")
                     falseResult
+
+                    ; If y > x, they're not equal, so false result
                     (ifgreater (var "_y")
                                (var "_x")
                                falseResult
+
+                               ; If we got here, x == y, so true result
                                trueResult))))
 
 ;; Part 4 - Using the language
